@@ -1,20 +1,44 @@
+package mailSystem;
+
+import gui.CheckList;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+
+/**
+ *
+ */
 public class JavaMailUtil {
 
+    public static PrintWriter writer;
+
+    static {
+        try {
+            writer = new PrintWriter("non-sent.txt", "UTF-8");
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     *
+     * @param recepient
+     * @param student
+     * @param reason
+     * @throws MessagingException
+     * @throws IOException
+     */
     public static void sendMail(String recepient, String[] student, int reason) throws MessagingException, IOException {
+        String subject1 = CheckList.subject;
+        String message1 = CheckList.message;
+
         Properties properties = new Properties();
         FileReader reader = new FileReader(".properties");
         properties.load(reader);
@@ -36,47 +60,37 @@ public class JavaMailUtil {
             if (!(message == null)) {
                 Transport.send(message);
             } else {
-                System.out.println(Arrays.toString(student) + " did not send---------");
+                writer.println(student[0]);
+                System.out.println();
             }
-        } else if (reason == 1) {
-            Message message = prepareMessageMissing(session, account, recepient, student);
+        } else if (reason == 2) {
+            Message message = Modular(session, account, recepient, student, subject1, message1);
             if (!(message == null)) {
                 Transport.send(message);
             } else {
-                System.out.println(Arrays.toString(student) + " did not send---------");
+                writer.println(student[0]);
+                System.out.println();
             }
         } else if (reason == 3) {
             Message message = prepareMessageProgress1Image(session, account, recepient, student);
             if (!(message == null)) {
                 Transport.send(message);
             } else {
-                System.out.println(Arrays.toString(student) + " did not send---------");
+                writer.println(student[0]);
+                System.out.println();
             }
         }
     }
 
-    private static Message prepareMessageMissing(Session session, String account, String rec, String[] student) {
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(account));
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(rec));
-            message.setSubject(Arrays.toString(student) + " has been missing days at RSS");
-            MimeMultipart multipart = new MimeMultipart("related");
-            BodyPart messageBodyPart = new MimeBodyPart();
-            String htmlText = " <H1>Lack of Attendence " + student[0] + "</H1> " +
-                    "<medium>testing<medium>" +
-                    "<img src=\"cid:image\">";
-            messageBodyPart.setContent(htmlText, "text/html");
-            multipart.addBodyPart(messageBodyPart);
-            message.setContent(multipart);
-            System.out.println(Arrays.toString(student) + " - good to go!");
-            return message;
-        } catch (Exception ex) {
-            Logger.getLogger(JavaMailUtil.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
 
+    /**
+     *
+     * @param session
+     * @param account
+     * @param rec
+     * @param student
+     * @return
+     */
     private static Message prepareMessageProgress(Session session, String account, String rec, String[] student) {
         try {
             int flag = 0;
@@ -91,7 +105,6 @@ public class JavaMailUtil {
                     "<strong>Contact outbreakguy1@gmail.com for any questions or information<strong>";
             messageBodyPart.setContent(htmlText, "text/html");
             multipart.addBodyPart(messageBodyPart);
-
             Properties properties = new Properties();
             FileReader reader = new FileReader(".properties");
             properties.load(reader);
@@ -119,24 +132,28 @@ public class JavaMailUtil {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Something went wrong");
             }
-
             message.setContent(multipart);
             if (flag > 1) {
                 return message;
             }
         } catch (Exception ex) {
-            Logger.getLogger(JavaMailUtil.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Message wasn't sent");
         }
         return null;
     }
 
+    /**
+     *
+     * @param multipart
+     * @param fileName
+     * @throws MessagingException
+     * @throws IOException
+     */
     public static void imgUpload(Multipart multipart, String fileName) throws MessagingException, IOException {
-
         Random ron = new Random();
         int no = ron.nextInt();
-
         String cid = Integer.toString(no);
         MimeBodyPart textPart = new MimeBodyPart();
         MimeBodyPart imagePart = new MimeBodyPart();
@@ -165,11 +182,7 @@ public class JavaMailUtil {
                 student[i] = student[i].replaceAll("\\.", " ").trim();
                 checker = checker.replaceAll("\\.", " ").trim();
             }
-
-
             MyMan function = new MyMan();
-
-
             if (checker.contains(student[0]) || student[0].contains(checker) || checker.contains(student[1]) || student[1].contains(checker) || function.myMan(student,checker)) {
                 path = file.getAbsolutePath();
                 break;
@@ -192,18 +205,15 @@ public class JavaMailUtil {
                     "<br><strong>Contact outbreakguy1@gmail.com for more information or questions. Have a good summer!<strong>";
             messageBodyPart.setContent(htmlText, "text/html");
             multipart.addBodyPart(messageBodyPart);
-
             Properties properties = new Properties();
             FileReader reader = new FileReader(".properties");
             properties.load(reader);
 
             String path = fileFinder(student, "C:\\Users\\Daniel Martinez\\IdeaProjects\\MassEmailDPS\\outputFile\\");
-            //String path2 = fileFinder(student, properties.getProperty("path2"));
 
             if (!path.equals("")) {
                 flag++;
                 imgUpload(multipart, path);
-                //imgUpload(multipart, path2);
                 System.out.println(Arrays.toString(student) + " - Good to go!");
                 System.out.println();
 
@@ -216,7 +226,33 @@ public class JavaMailUtil {
                 return message;
             }
         } catch (Exception ex) {
-            //Logger.getLogger(JavaMailUtil.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Message wasn't sent");
+        }
+        return null;
+    }
+    private static Message Modular(Session session, String account, String rec, String[] student,
+                                   String subject, String emailMessage) {
+        try {
+            emailMessage = emailMessage.replace("[student]", student[0]);
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(account));
+            message.setRecipient(Message.RecipientType.TO, new InternetAddress(rec));
+            message.setSubject(subject);
+            MimeMultipart multipart = new MimeMultipart("related");
+            BodyPart messageBodyPart = new MimeBodyPart();
+            String htmlText =
+                    "<medium>" + emailMessage + "<medium>" +
+                            "<img src=\"cid:image\">";
+            messageBodyPart.setContent(htmlText, "text/html");
+            multipart.addBodyPart(messageBodyPart);
+            message.setContent(multipart);
+            CheckList.textArea.append("\n" + Arrays.toString(student) + " - good to go!");
+            CheckList.textPanel.update(CheckList.textPanel.getGraphics());
+            CheckList.textArea.update(CheckList.textArea.getGraphics());
+            //System.out.println(student + " - good to go!");
+            return message;
+        } catch (Exception ex){
+            System.out.println("Message wasn't sent");
         }
         return null;
     }

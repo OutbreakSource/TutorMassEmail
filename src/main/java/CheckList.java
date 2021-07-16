@@ -1,3 +1,4 @@
+import mailSystem.JavaMailUtil;
 import org.apache.commons.lang3.text.WordUtils;
 
 import javax.mail.BodyPart;
@@ -235,7 +236,7 @@ public class CheckList extends JFrame {
                         .replace("]", "")  .replace("  ", " ")//remove the left bracket
                         .trim();
                 if(formattedString.contains(refactorS)){
-                    //JavaMailUtil.sendMail("danieltutordps@gmail.com", refactorS, 0);
+                    //mailSystem.JavaMailUtil.sendMail("danieltutordps@gmail.com", refactorS, 0);
                 }
             }
         }

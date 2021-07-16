@@ -1,4 +1,4 @@
-package gui;
+package mailSystem;
 
 public class MyMan {
 

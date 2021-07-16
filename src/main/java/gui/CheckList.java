@@ -1,6 +1,10 @@
 package gui;
 
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javax.swing.*;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import mailSystem.JavaMailUtil;
 import org.apache.commons.lang3.text.WordUtils;
 import javax.mail.MessagingException;
 import javax.swing.*;
@@ -14,6 +18,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 
+/**
+ *
+ */
 public class CheckList extends JFrame {
 
 
@@ -33,7 +40,7 @@ public class CheckList extends JFrame {
                 '}';
     }
 
-    List<String> students = new ArrayList<>(countLineJava8("testingbb.csv"));
+    List<String> students = new ArrayList<>(countLineJava8("allStudents.csv"));
 
     public static void main() throws IOException, MessagingException {
         try {
@@ -53,13 +60,18 @@ public class CheckList extends JFrame {
         frame.setTitle("Dandini");
     }
 
+    /**
+     *
+     * @throws IOException
+     * @throws MessagingException
+     */
     public CheckList() throws IOException, MessagingException {
         super("sample.CheckList");
         textArea.setFont(new Font("Times New Roman", Font.PLAIN, 25));
 
 
-        Scanner sc = new Scanner(new File("testingbb.csv"));
-        String[] strs = new String[countLineJava8("testingbb.csv")];
+        Scanner sc = new Scanner(new File("allStudents.csv"));
+        String[] strs = new String[countLineJava8("allStudents.csv")];
 
         int count = 0;
         sc.useDelimiter(",");
@@ -78,16 +90,6 @@ public class CheckList extends JFrame {
         }
         Arrays.sort(strs);
         JScrollPane sp = checklistThing(strs);
-
-        //This is the small text area below the list of students
-        /*
-        final JTextArea textArea = new JTextArea(10, 10);
-        JScrollPane textPanel = new JScrollPane(textArea);
-        PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
-        System.setOut(printStream);
-        System.setErr(printStream);
-         */
-
         textArea.setFont(new Font("New Times Roman", Font.PLAIN, 25));
 
         JButton printButton = new JButton("Email");
@@ -131,8 +133,14 @@ public class CheckList extends JFrame {
                 new Popup();
             }
         });
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 1));
-        all = new JCheckBox("Select All...");
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
+        JComboBox comboBox = new JComboBox(strs);
+        AutoCompleteDecorator.decorate(comboBox);
+        comboBox.setFont(new Font("Times New Roman", Font.PLAIN, 25));
+        JButton add = new JButton("Add Selected");
+        add.setFont(new Font("Times New Roman", Font.PLAIN, 25));
+        all = new JCheckBox("Select All");
+        all.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         all.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,21 +152,53 @@ public class CheckList extends JFrame {
                 }
             }
         });
-
-        JButton force = new JButton("force close");
-        force.addActionListener(new ActionListener() {
+        JButton cred = new JButton("Credit");
+        cred.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                JOptionPane.showMessageDialog(null,"Written by Daniel Martinez (7/15/21)\n" +
+                        "Worked with Sliter and Opferman as a math tutor to create this system.\n" +
+                        "Planning was a team effort");
             }
         });
+
+        final String[] highlighted = {null};
+        comboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                highlighted[0] = comboBox.getSelectedItem().toString();
+            }
+        });
+        add.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!students.contains(highlighted[0])){
+                    students.add(highlighted[0]);
+                }
+            }
+        });
+
+        JButton clear = new JButton("Clear Selected");
+        clear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                students.removeAll(students);
+                textArea.setText("");
+                textArea.append(CheckList.this.toString());
+            }
+        });
+
+
+        header.add(comboBox);
+        header.add(add);
         header.add(all);
         add(header, BorderLayout.NORTH);
-        JPanel panel = new JPanel(new GridLayout(4, 1));
-        panel.add(force);
-        panel.add(editButton);
-        panel.add(printButton);
-        panel.add(clearButton);
+        JPanel panel = new JPanel(new GridLayout(5, 1));
+        panel.add(clear).setFont(new Font("Times New Roman", Font.PLAIN, 25));
+        panel.add(editButton).setFont(new Font("Times New Roman", Font.PLAIN, 25));
+        panel.add(printButton).setFont(new Font("Times New Roman", Font.PLAIN, 25));
+        panel.add(clearButton).setFont(new Font("Times New Roman", Font.PLAIN, 25));
+        panel.add(cred).setFont(new Font("Times New Roman", Font.PLAIN, 25));
         getContentPane().add(sp, BorderLayout.CENTER);
         getContentPane().add(panel, BorderLayout.EAST);
         getContentPane().add(textPanel, BorderLayout.SOUTH);
@@ -205,8 +245,14 @@ public class CheckList extends JFrame {
         }
     }
 
+    /**
+     *
+     * @param students
+     * @throws IOException
+     * @throws MessagingException
+     */
     public void runit(List<String> students) throws IOException, MessagingException {
-        Scanner sc = new Scanner(new File("testingbb.csv"));
+        Scanner sc = new Scanner(new File("allStudents.csv"));
         sc.useDelimiter(",");
         while(sc.hasNext()){
             String line1 = sc.nextLine();
@@ -245,8 +291,7 @@ public class CheckList extends JFrame {
                 formattedString = WordUtils.capitalizeFully(formattedString);
 
                 if(formattedString.contains(bud[0]) || formattedString.contains(bud[1])){
-                    JavaMailUtil.sendMail("danieltutordps@gmail.com", bud[0], 0, subject, message);
-
+                    JavaMailUtil.sendMail("danieltutordps@gmail.com", bud, 2);
                 }
             }
         }

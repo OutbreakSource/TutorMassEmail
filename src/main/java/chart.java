@@ -127,30 +127,25 @@ public class chart extends ApplicationFrame {
                     || className.contains("Algebra") || className.contains("Precalculus") || Double.parseDouble(line[5]) != 100;
             if (line1.contains("N/A")) {
                 line[line.length-1] = String.valueOf(0);
-                double one = Double.parseDouble(line[5]);
-                double two = Double.parseDouble(line[8]);
-                double[] data = {one, two};
-
-                if(b){
-                    saveImage(name, createChart(name, data, className), savePath);
-                    System.out.println(name);
-                }
-                else {
-                    System.out.println("YEET:\n" + name + className);
-                }
+                variables(savePath, line, name, className, b);
             } else {
-                double one = Double.parseDouble(line[5]);
-                double two = Double.parseDouble(line[8]);
-                double[] data = {one, two};
-                if(b){
-                    saveImage(name, createChart(name, data, className), savePath);
-                    System.out.println(name);
-                }
-                else {
-                    System.out.println("YEET:\n" + name + className);
-                }
+                variables(savePath, line, name, className, b);
             }
 
+        }
+    }
+
+    private static void variables(String savePath, String[] line, String name, String className, boolean b) throws IOException {
+        double one = Double.parseDouble(line[5]);
+        double two = Double.parseDouble(line[8]);
+        double[] data = {one, two};
+
+        if(b){
+            saveImage(name, createChart(name, data, className), savePath);
+            System.out.println(name);
+        }
+        else {
+            System.out.println("YEET:\n" + name + className);
         }
     }
 }
