@@ -15,7 +15,6 @@ Focused on bar graphs from JFreeChart and sending them out to student's parents,
 The intention is to send emails quickly and with the ability of being modular. The system uses the student's name instead of bulk vague emails about your 'student', 
 making it a bit personal. 
 
-![](https://im3.ezgif.com/tmp/ezgif-3-6e604975a695.gif)
 ![](https://i.gyazo.com/9cb9ce995b2253848ffa8a6c7d7cce19.png)
 
 
